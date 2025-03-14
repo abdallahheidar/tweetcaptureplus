@@ -79,4 +79,4 @@ tweetcaptureplus -sm 3 https://twitter.com/Twitter/status/1445078208190291973
 tweetcaptureplus -sp https://x.com/elonmusk/status/1746970616060580326
 ```
 
-<img src="/tweetcaptureplus/assets/@elonmusk_1746970616060580326_tweetcaptureplus.png" width="500">
+<img src="/tweetcaptureplus/assets/@elonmusk_1746970616060580326.png" width="500">

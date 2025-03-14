@@ -30,4 +30,3 @@ tweetcaptureplus = "tweetcaptureplus.cli:main"
 [project.urls]
 Homepage = "https://github.com/abdallahheidar/tweetcaptureplus"
 Issues = "https://github.com/abdallahheidar/tweetcaptureplus/issues"
-

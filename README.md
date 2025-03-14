@@ -1,3 +1,5 @@
+[![Hits](https://hits.sh/github.com/abdallahheidar/tweetcaptureplus.svg?label=TweetCapturePlus%20Views&extraCount=142)](https://hits.sh/github.com/abdallahheidar/tweetcaptureplus/)
+
 # TweetCapturePlus
 
 Easily take screenshots of **tweets**, **mentions**, and **full threads**.

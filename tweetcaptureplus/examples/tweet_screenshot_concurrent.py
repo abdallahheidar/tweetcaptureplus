@@ -1,4 +1,4 @@
-from tweetcapture import TweetCapture
+from tweetcapture import TweetCapturePlus
 import asyncio
 
 TweetURLs = [
@@ -8,7 +8,7 @@ TweetURLs = [
 ]
 
 async def taskCapture(url, port):
-    tweet = TweetCapture()
+    tweet = TweetCapturePlus()
     tweet.add_chrome_argument(f"--remote-debugging-port={port}")
     filename = await tweet.screenshot(url, overwrite=True)
     return filename

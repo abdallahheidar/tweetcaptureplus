@@ -1,5 +1,5 @@
 import cv2
-from tweetcapture import TweetCapture
+from tweetcapture import TweetCapturePlus
 from asyncio import run
 import unittest
 from os import remove, environ
@@ -14,7 +14,7 @@ class TestScreenshot(unittest.TestCase):
     result_path = ""
 
     def __init__(self, *args, **kwargs):
-        self.tweetcapture = TweetCapture(test=True, overwrite=True)
+        self.tweetcapture = TweetCapturePlus(test=True, overwrite=True)
         self.tweetcapture.set_lang('en')
         super(TestScreenshot, self).__init__(*args, **kwargs)
 

@@ -16,4 +16,4 @@ RUN pip install --no-deps .
 
 WORKDIR /app
 
-ENTRYPOINT  ["tweetcapture", "--chromedriver", "/usr/bin/chromedriver"]
+ENTRYPOINT  ["tweetcaptureplus", "--chromedriver", "/usr/bin/chromedriver"]

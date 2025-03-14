@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+.vscode/
 .venv
 env/
 venv/
@@ -129,6 +130,6 @@ dmypy.json
 .pyre/
 
 # Screenshots
-*_tweetcapture*.png
-tweetcapture/tests/*.png
-tweetcapture/tests/*.jpg
+*_tweetcaptureplus*.png
+tweetcaptureplus/tests/*.png
+tweetcaptureplus/tests/*.jpg

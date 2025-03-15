@@ -103,7 +103,11 @@ class TweetCapturePlus:
             main_tweet_xpath = """//article[@role='article' and @tabindex='-1']"""
             main_tweet_comment_box_xpath = ".//ancestor::button[@data-testid = 'tweetButtonInline']/../../../../../../../../../../.."
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_xpath)))
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_comment_box_xpath)))
+            try:
+                if self.cookies:
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_comment_box_xpath)))
+            except:
+                pass
             self.__hide_global_items(driver)
             driver.execute_script("!!document.activeElement ? document.activeElement.blur() : 0")
             if self.test is True:
@@ -128,7 +132,7 @@ class TweetCapturePlus:
                         self.hide_gifs,
                         self.hide_quotes,
                     )
-
+            self.__increase_container_height(driver)
             if len(elements) == 1:
                 driver.execute_script("window.scrollTo(0, 0);")
                 x, y, width, height = driver.execute_script(
@@ -230,7 +234,6 @@ class TweetCapturePlus:
             except:
                 continue
 
-
     def hide_all_media(self):
         self.hide_link_previews = True
         self.hide_photos = True
@@ -327,15 +330,18 @@ class TweetCapturePlus:
 
     # Return: (elements, main_element_index)
     def __get_tweets(self, driver, show_parents, parent_tweets_limit, show_mentions_count):
-        els = driver.find_elements(By.XPATH, "(//ancestor::article)/..")
+        els = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "(//ancestor::article)/..")))
+
         elements = []
         for element in els:
-            if len(element.find_elements(By.XPATH, ".//article[contains(@data-testid, 'tweet')]")) > 0:
-                source = element.get_attribute("innerHTML")
-                # sponsored tweet pass
-                if element.find_elements(By.XPATH, "//span[text()='Ad']"):  # Check for span with value "Ad"
-                    continue
-                elements.append(element)
+            try:
+                if len(element.find_elements(By.XPATH, ".//article[contains(@data-testid, 'tweet')]")) > 0:
+                    # sponsored tweet pass
+                    if element.find_elements(By.XPATH, ".//span[text()='Ad']"):  # Check for span with value "Ad"
+                        continue
+                    elements.append(element)
+            except:
+                continue
         length = len(elements)
         if length > 0:
             if length == 1:
@@ -377,6 +383,22 @@ class TweetCapturePlus:
     def set_gui(self, gui):
         self.gui = True if gui is True else False
 
+    def __increase_container_height(self, driver):
+        # Wait for the element to be available
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//article/ancestor::div[4]")))
+
+        # Get the current min-height value
+        current_min_height = element.value_of_css_property("min-height")
+
+        # Remove the 'px' suffix and convert the value to an integer
+        current_min_height_value = int(current_min_height.replace("px", ""))
+
+        # Increase the min-height by 1000px
+        new_min_height = current_min_height_value + 1000
+
+        # Set the new min-height value using JavaScript
+        driver.execute_script("arguments[0].style.minHeight = '{}px';".format(new_min_height), element)
+
     def save_long_screenshot(self, driver, element, path):
         # Get the location and size of the element
         start_y = element.location["y"]
@@ -390,8 +412,7 @@ class TweetCapturePlus:
 
         # Check if the element's height is longer than the viewport height
         if total_height < viewport_height:
-            driver.execute_script(f"window.scrollTo(0, 0);")
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.TAG_NAME, "body")))
             element.screenshot(path)
             return
 

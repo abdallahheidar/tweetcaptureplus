@@ -100,13 +100,16 @@ class TweetCapturePlus:
                 for cookie in self.cookies:
                     driver.add_cookie(cookie)
             driver.get(url)
-            await sleep(self.wait_time)
+            main_tweet_xpath = """//article[@role='article' and @tabindex='-1']"""
+            main_tweet_comment_box_xpath = ".//ancestor::button[@data-testid = 'tweetButtonInline']/../../../../../../../../../../.."
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_xpath)))
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_comment_box_xpath)))
             self.__hide_global_items(driver)
             driver.execute_script("!!document.activeElement ? document.activeElement.blur() : 0")
             if self.test is True:
                 driver.save_screenshot(f"web{self.__web}.png")
                 self.__web += 1
-            await sleep(2.0)
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, main_tweet_xpath)))
             elements, main = self.__get_tweets(
                 driver,
                 (self.show_parent_tweets if show_parent_tweets is None else show_parent_tweets),

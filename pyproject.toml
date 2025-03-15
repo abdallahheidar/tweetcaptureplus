@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tweetcaptureplus"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
   { name="Abdallah Heidar", email="abdallahheidar@gmail.com" },
   { name="Alperen Çetin", email="xacnio@pm.me" },

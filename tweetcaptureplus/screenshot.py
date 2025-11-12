@@ -43,7 +43,7 @@ class TweetCapturePlus:
         parent_tweets_limit=-1,
         show_mentions_count=0,
         overwrite=True,
-        radius=15,
+        radius=0,
         gui=False,
     ):
         self.set_night_mode(night_mode)
@@ -140,7 +140,7 @@ class TweetCapturePlus:
                     elements[0],
                 )
                 await sleep(0.1)
-                self.save_long_screenshot(driver, elements[0], path)
+                await self.save_long_screenshot(driver, elements[0], path)
                 new_im = Image.open(path)
                 new_im = add_corners(new_im, self.radius)
                 new_im.save(path, quality=100)
@@ -155,7 +155,7 @@ class TweetCapturePlus:
                         element,
                     )
                     await sleep(0.1)
-                    self.save_long_screenshot(driver, element, filename)
+                    await self.save_long_screenshot(driver, element, filename)
                     filenames.append(filename)
                 width = 0
                 height = 0
@@ -215,12 +215,11 @@ class TweetCapturePlus:
 
     def __hide_global_items(self, driver):
         HIDE_ITEMS_XPATH = [
-            "/html/body/div/div/div/div[1]",
-            "/html/body/div/div/div/div[2]/header",
-            "/html/body/div/div/div/div[2]/main/div/div/div/div/div/div[1]",
-            ".//ancestor::button[@data-testid = 'tweetButtonInline']/../../../../../../../../../../..",
-            """//a[@data-testid="logged_out_read_replies_pivot"]""",
-            """//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div[1]/div/section/div/div/div[1]/div[1]/div/div""",
+            "/html/body/div/div/div/div[2]/main/div/div/div/div/div/div[1]",  # Post top bar
+            ".//ancestor::button[@data-testid = 'tweetButtonInline']/../../../../../../../../../../..",  # Authenticated, comment box
+            "//span[contains(text(), 'Who can reply?')]/../../../../..",  # Who can reply box
+            """//a[@data-testid="logged_out_read_replies_pivot"]""",  # Unauthenticated, read replies
+            """//div[@data-testid='BottomBar']""",  # Unauthenticated, sign-in bar
         ]
         for item in HIDE_ITEMS_XPATH:
             try:
@@ -385,21 +384,23 @@ class TweetCapturePlus:
 
     def __increase_container_height(self, driver):
         # Wait for the element to be available
-        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//article/ancestor::div[4]")))
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//main[@role='main']")))
 
         # Get the current min-height value
-        current_min_height = element.value_of_css_property("min-height")
+        current_height = element.value_of_css_property("height")
 
         # Remove the 'px' suffix and convert the value to an integer
-        current_min_height_value = int(current_min_height.replace("px", ""))
+        current_height_value = int(current_height.replace("px", ""))
 
         # Increase the min-height by 1000px
-        new_min_height = current_min_height_value + 1000
+        new_min_height = current_height_value + 1000
 
-        # Set the new min-height value using JavaScript
-        driver.execute_script("arguments[0].style.minHeight = '{}px';".format(new_min_height), element)
+        # override by CSS while keeping the change minimal.
+        driver.execute_script("arguments[0].style.setProperty('min-height', '{}px', 'important');".format(new_min_height), element)
 
-    def save_long_screenshot(self, driver, element, path):
+        WebDriverWait(driver, getattr(self, "wait_time", 5)).until(lambda d: (lambda v: int(float(v.replace("px", ""))) >= new_min_height if isinstance(v, str) and v.endswith("px") else False)(d.execute_script("return window.getComputedStyle(arguments[0]).getPropertyValue('min-height');", element)))
+
+    async def save_long_screenshot(self, driver, element, path):
         # Get the location and size of the element
         start_y = element.location["y"]
         size = element.size
@@ -420,6 +421,7 @@ class TweetCapturePlus:
         scroll_height = 200
         for i in range(0, total_height, scroll_height):
             driver.execute_script(f"window.scrollTo(0, {start_y + i});")
+            await sleep(0.1)
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
             element.screenshot("screenshot_{}.png".format(i))
             image = Image.open("screenshot_{}.png".format(i))
